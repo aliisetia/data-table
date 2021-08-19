@@ -18,28 +18,28 @@ const columns: TableColumn<Passenger>[] = [
   {
     name: "ID",
     selector: (row) => row["id"],
-    sortable: true,
+    sortable: true
   },
   {
     name: "Name",
     selector: (row) => row["name"],
-    sortable: true,
+    sortable: true
   },
   {
     name: "Trips",
     selector: (row) => row["trips"],
-    sortable: true,
+    sortable: true
   },
   {
     name: "Airline Name",
     selector: (row) => row["airline"][0]["name"],
-    sortable: true,
+    sortable: true
   },
   {
     name: "Airline Country",
     selector: (row) => row["airline"][0]["country"],
-    sortable: true,
-  },
+    sortable: true
+  }
 ];
 
 export const TablePage: FC = () => {
@@ -62,6 +62,7 @@ export const TablePage: FC = () => {
     column: TableColumn<Passenger> | null,
     direction: "asc" | "desc"
   ) => {
+    console.log("check handlePageChange");
     setPage(newPage);
     setSortBy(column);
     setSortDirection(direction);
@@ -77,7 +78,7 @@ export const TablePage: FC = () => {
       const result = await window.fetch(
         `http://localhost:4000/data?_page=${page}&_limit=${rows}`,
         {
-          method: "GET",
+          method: "GET"
         }
       );
       const json = await result.json();
@@ -126,7 +127,7 @@ export const TablePage: FC = () => {
             key="Input Action"
             className="px-3 py-2 rounded border border-solid border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none disabled:text-gray-500"
             placeholder="Type Keyword"
-          />,
+          />
         ]}
         subHeaderComponent={[
           <h3 key="Show Sub" className="mr-4">
@@ -139,7 +140,7 @@ export const TablePage: FC = () => {
             key="Input Sub"
             className="px-3 py-2 rounded border border-solid border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none disabled:text-gray-500"
             placeholder="Type Keyword"
-          />,
+          />
         ]}
         pagination={true}
         paginationDataFromApi={true}

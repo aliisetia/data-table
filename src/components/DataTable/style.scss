@@ -1,0 +1,73 @@
+.snb-table {
+  @apply relative w-full;
+
+  .rdt_Table[disabled=""] {
+    @apply opacity-100;
+  }
+
+  .rdt_TableHeader {
+    & > div:nth-of-type(2) > * {
+      @apply ml-0 text-base;
+    }
+  }
+
+  .rdt_TableHeadRow {
+    & > div {
+      @apply py-3 px-6;
+    }
+
+    & > div:first-of-type {
+      @apply pl-4 pr-0;
+    }
+
+    & > div:last-of-type {
+      @apply pl-0 pr-4;
+    }
+  }
+
+  .rdt_TableBody {
+    & > div:hover {
+      background-color: #fafafa;
+    }
+  }
+
+  .rdt_TableRow {
+    & > div {
+      @apply py-3 px-6;
+    }
+
+    & > div:first-of-type {
+      @apply pl-4 pr-0;
+    }
+
+    & > div:last-of-type {
+      @apply pl-0 pr-4;
+    }
+  }
+
+  &__loader-wrapper {
+    @apply absolute flex items-center justify-center w-full p-4 z-10 top-2/4 transform -translate-y-2/4;
+  }
+
+  &__loader {
+    @apply inline-block w-56 h-56;
+
+    &::after {
+      @apply block w-48 h-48 m-2 rounded-full;
+      content: " ";
+      border-width: 16px;
+      border-style: solid;
+      border-color: #fff #f0444c #fff #f0444c;
+      animation: snb-loader 3s linear infinite;
+    }
+
+    @keyframes snb-loader {
+      0% {
+        @apply transform rotate-0;
+      }
+      100% {
+        @apply transform rotate-180;
+      }
+    }
+  }
+}

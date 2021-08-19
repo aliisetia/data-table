@@ -1,23 +1,34 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Switch, Route } from "react-router-dom";
+
+import { TablePage } from "components/DataTable/page";
+import { ZonkPage } from "components/Zonk/page";
+import { IRoute as AppRoute, routeFactory } from "router/routeFactory";
+import "./App.scss";
+
+const ROUTES: Array<AppRoute> = [
+  {
+    path: "/",
+    component: TablePage,
+  },
+  {
+    path: "/zonk",
+    component: ZonkPage,
+  },
+];
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <div style={{ width: "90%", padding: 32 }} className="data-table">
+          <BrowserRouter>
+            <Switch>
+              {routeFactory(ROUTES)}
+              {/* 404 (not found path) will be redirected to Home page temporarily */}
+              <Route component={TablePage} />
+            </Switch>
+          </BrowserRouter>
+        </div>
       </header>
     </div>
   );

@@ -86,104 +86,131 @@ const Table = <T extends TableRecord>(props: TableProps<T>): JSX.Element => {
   };
 
   const handlePersistSelectedRowsChange = async (
-    selectedRows: Array<T>,
+    selectedRows: any,
     selectedCount: number
   ): Promise<void> => {
     console.log("from selectedRows.length === 0", {
       selectedRows,
       selectedCount,
       selectedData,
-      indeterminate:
-        pagesSelectAllStatus[props.paginationCurrentPage! - 1].checked ===
-        "indeterminate",
-      checked: pagesSelectAllStatus[props.paginationCurrentPage! - 1].checked
+      // indeterminate:
+      //   pagesSelectAllStatus[props.paginationCurrentPage! - 1].checked ===
+      //   "indeterminate",
+      // checked: pagesSelectAllStatus[props.paginationCurrentPage! - 1].checked,
+      
+    },props.paginationCurrentPage, data);
+
+    const filterSelected = data.filter(d => selectedRows.filter((row:any) => d.id === row.id).length);
+
+    filterSelected.forEach(async (row) => {
+      const isInDB = await indexedDB.selectedData.get(row.id);
+
+      if (!isInDB) {
+        indexedDB.selectedData.add({ id: row.id }, row.id);
+      }
     });
 
-    if (selectedRows.length === 0) {
-      // Change this page select all value to false
-      // if (selectedCount === 0 && currentPage !== prevPage) {
-      //   handleUncheckContextCheckbox();
-      // } else {
-      //   const tempPagesSelectAllStatus = pagesSelectAllStatus;
-      //   const currentPageSelectAllStatus = tempPagesSelectAllStatus[
-      //     props.paginationCurrentPage! - 1
-      //   ] ?? { page: props.paginationCurrentPage! - 1, checked: false };
-      //   currentPageSelectAllStatus.checked = false;
-      //   tempPagesSelectAllStatus[props.paginationCurrentPage! - 1] =
-      //     currentPageSelectAllStatus;
-      //   setPagesSelectAllStatus(tempPagesSelectAllStatus);
-      //   setSelectAllFlag(false);
-      // }
-      handleUncheckContextCheckbox();
-    } else if (selectedRows.length === data.length) {
-      handleCheckContextCheckbox();
-    } else {
-      let indeterminateCount = 0;
+    const filterDeleted = data.filter(d => !selectedRows.filter((row:any) => d.id === row.id).length);
 
-      selectedRows.forEach((row) => {
-        const isInData = data.some((datum) => datum.id === row.id);
 
-        if (isInData) {
-          indeterminateCount = indeterminateCount + 1;
-        }
-      });
+    console.log('check filterDeleted', data, selectedData, filterDeleted)
 
-      if (
-        pagesSelectAllStatus[props.paginationCurrentPage! - 1].checked !== true
-      ) {
-        console.log("masuk sini checked !== true");
-        selectedRows.forEach(async (row) => {
-          const isInDB = await indexedDB.selectedData.get(row.id);
-
-          if (!isInDB) {
-            await indexedDB.selectedData.add({ id: row.id });
-          }
-        });
+    filterDeleted.forEach(async (row) => {
+      const isInDB = await indexedDB.selectedData.get(row.id);
+      console.log('check isInDB', isInDB, row);
+      if (isInDB) {
+        console.log('check deleted', row.id)
+        indexedDB.selectedData.delete(row.id);
       }
+    });
 
-      const hashMapSelectedRows = selectedRows.reduce(
-        (map: Record<string, any>, obj: T) => {
-          map[obj.id] = obj.id;
-          return map;
-        },
-        {}
-      );
+    setSelectAllFlag(filterSelected.length === data.length)
 
-      console.log({ hashMapSelectedRows });
+    // if (selectedRows.length === 0) {
+    //   // Change this page select all value to false
+    //   // if (selectedCount === 0 && currentPage !== prevPage) {
+    //   //   handleUncheckContextCheckbox();
+    //   // } else {
+    //   //   const tempPagesSelectAllStatus = pagesSelectAllStatus;
+    //   //   const currentPageSelectAllStatus = tempPagesSelectAllStatus[
+    //   //     props.paginationCurrentPage! - 1
+    //   //   ] ?? { page: props.paginationCurrentPage! - 1, checked: false };
+    //   //   currentPageSelectAllStatus.checked = false;
+    //   //   tempPagesSelectAllStatus[props.paginationCurrentPage! - 1] =
+    //   //     currentPageSelectAllStatus;
+    //   //   setPagesSelectAllStatus(tempPagesSelectAllStatus);
+    //   //   setSelectAllFlag(false);
+    //   // }
+    //   handleUncheckContextCheckbox();
+    // } else if (selectedRows.length === data.length) {
+    //   handleCheckContextCheckbox();
+    // } else {
+    //   let indeterminateCount = 0;
 
-      selectedData?.forEach(async (row) => {
-        const isSelected = hashMapSelectedRows[row.id];
+    //   selectedRows.forEach((row) => {
+    //     const isInData = data.some((datum) => datum.id === row.id);
 
-        if (!isSelected) {
-          await indexedDB.selectedData.delete(row.id);
-        }
-      });
+    //     if (isInData) {
+    //       indeterminateCount = indeterminateCount + 1;
+    //     }
+    //   });
 
-      const indeterminate: boolean =
-        indeterminateCount === data.length || indeterminateCount === 0
-          ? false
-          : true;
-      const checked: boolean =
-        indeterminateCount === data.length ? true : false;
+    //   if (
+    //     pagesSelectAllStatus[props.paginationCurrentPage! - 1].checked !== true
+    //   ) {
+    //     console.log("masuk sini checked !== true");
+    //     selectedRows.forEach(async (row) => {
+    //       const isInDB = await indexedDB.selectedData.get(row.id);
 
-      console.log({ indeterminate, indeterminateCount, checked });
+    //       if (!isInDB) {
+    //         await indexedDB.selectedData.add({ id: row.id });
+    //       }
+    //     });
+    //   }
 
-      const tempPagesSelectAllStatus = [...pagesSelectAllStatus];
-      const currentPageSelectAllStatus =
-        tempPagesSelectAllStatus[props.paginationCurrentPage! - 1];
-      currentPageSelectAllStatus.checked = indeterminate
-        ? "indeterminate"
-        : checked;
-      tempPagesSelectAllStatus[props.paginationCurrentPage! - 1] =
-        currentPageSelectAllStatus;
-      setPagesSelectAllStatus(tempPagesSelectAllStatus);
+    //   const hashMapSelectedRows = selectedRows.reduce(
+    //     (map: Record<string, any>, obj: T) => {
+    //       map[obj.id] = obj.id;
+    //       return map;
+    //     },
+    //     {}
+    //   );
 
-      if (checked) {
-        setSelectAllFlag(true);
-      } else {
-        setSelectAllFlag(false);
-      }
-    }
+    //   console.log({ hashMapSelectedRows });
+
+    //   selectedData?.forEach(async (row) => {
+    //     const isSelected = hashMapSelectedRows[row.id];
+
+    //     if (!isSelected) {
+    //       await indexedDB.selectedData.delete(row.id);
+    //     }
+    //   });
+
+    //   const indeterminate: boolean =
+    //     indeterminateCount === data.length || indeterminateCount === 0
+    //       ? false
+    //       : true;
+    //   const checked: boolean =
+    //     indeterminateCount === data.length ? true : false;
+
+    //   console.log({ indeterminate, indeterminateCount, checked });
+
+    //   const tempPagesSelectAllStatus = [...pagesSelectAllStatus];
+    //   const currentPageSelectAllStatus =
+    //     tempPagesSelectAllStatus[props.paginationCurrentPage! - 1];
+    //   currentPageSelectAllStatus.checked = indeterminate
+    //     ? "indeterminate"
+    //     : checked;
+    //   tempPagesSelectAllStatus[props.paginationCurrentPage! - 1] =
+    //     currentPageSelectAllStatus;
+    //   setPagesSelectAllStatus(tempPagesSelectAllStatus);
+
+    //   if (checked) {
+    //     setSelectAllFlag(true);
+    //   } else {
+    //     setSelectAllFlag(false);
+    //   }
+    // }
   };
 
   const handleCheckContextCheckbox = () => {
@@ -246,12 +273,18 @@ const Table = <T extends TableRecord>(props: TableProps<T>): JSX.Element => {
     setData(props.data);
   }, [props.data]);
 
-  useEffect(() => {
-    // Rerender by manually resetting data state
-    const reCreatedData = [...data];
-    setData(reCreatedData);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedData.length]);
+  // useEffect(() => {
+  //   // Rerender by manually resetting data state
+  //   const reCreatedData = [...data];
+  //   setData(reCreatedData);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [selectedData.length]);
+
+  useEffect((
+  )=>{
+    // if(!selectAllFlag)
+    //   setAllDataSelected(selectAllFlag)
+  },[selectAllFlag])
 
   return (
     <div className="snb-table">
@@ -280,7 +313,7 @@ const Table = <T extends TableRecord>(props: TableProps<T>): JSX.Element => {
               : "translate3d(0,-100%,0)"
         }}
       >
-        <span>{`${selectedData.length} items selected`}</span>
+        <span>{`${selectedData.length} item${selectedData.length > 1 ? 's' : ''} selected`}</span>
       </div>
       <DataTable
         columns={props.columns}
@@ -317,6 +350,7 @@ const Table = <T extends TableRecord>(props: TableProps<T>): JSX.Element => {
         paginationDefaultPage={props.paginationDefaultPage}
         paginationRowsPerPageOptions={props.paginationRowsPerPageOptions}
         onChangePage={(page, totalRows) => {
+          console.log('onChangePage')
           if (props.onPageChange) {
             if (page > pagesSelectAllStatus.length) {
               pagesSelectAllStatus.push({
@@ -383,21 +417,25 @@ const Table = <T extends TableRecord>(props: TableProps<T>): JSX.Element => {
             });
           }
 
-          handlePersistSelectedRowsChange(selectedRows, selectedCount);
+          const param = (selectedRows.length ? selectedRows : selectedData)
+
+          handlePersistSelectedRowsChange( param , selectedCount);
         }}
         selectableRowDisabled={props.disableRowToBeSelected}
-        selectableRowSelected={(row) => {
-          if (props.rowSelected) {
-            return props.rowSelected(row);
-          } else {
-            return selectedData.some((datum) => datum.id === row.id);
-          }
-        }}
-        selectableRowsComponentProps={{
-          indeterminate:
-            pagesSelectAllStatus[props.paginationCurrentPage! - 1]?.checked ===
-            "indeterminate"
-        }}
+        // selectableRowSelected={(row) => {
+        // //   // console.log('checking 1', row, selectedData.some((datum) => datum.id === row.id))
+        //   if (props.rowSelected) {
+        //     return props.rowSelected(row);
+        //   } else {
+        //     return true
+        // //     return allDataSelected || selectedData.some((datum) => datum.id === row.id);
+        //   }
+        // }}
+        // selectableRowsComponentProps={{
+        //   indeterminate:
+        //     pagesSelectAllStatus[props.paginationCurrentPage! - 1]?.checked ===
+        //     "indeterminate"
+        // }}
         clearSelectedRows={clearSelectedData}
         noContextMenu={true}
         expandableRows={props.expandableRows}
